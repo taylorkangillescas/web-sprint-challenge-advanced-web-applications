@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import EditMenu from './EditMenu';
-import {axiosWithAuth} from '../helpers/axiosWithAuth';
+import axios from 'axios';
+import { updateColor, deleteColor as apiDeleteColor } from '../helpers/api';
 
 const initialColor = {
   color: "",
@@ -18,28 +19,21 @@ const ColorList = ({ colors, updateColors }) => {
 
   const saveEdit = e => {
     e.preventDefault();
-    axiosWithAuth().put(`/colors/${colorToEdit.id}`, colorToEdit)
-    .then(res=>{
-      setEditing(false);
-      updateColors(
-        colors.map(color=>{
-          return color.id === colorToEdit.id ? res.data  : color;
-        })
-      )
-    })
-
+    updateColor(colorToEdit.id, colorToEdit)
+      .then(res => {
+        console.log('edit', res);
+        updateColors();
+      })
+      .catch(err => console.error(err.response));
   };
 
   const deleteColor = color => {
-    axiosWithAuth().delete(`/colors/${color.id}`)
-    .then(res=>{
-      updateColors(
-        colors.filter(item=>{
-          return item.id !== color.id
-        })
-      )
-    })
-    .catch(err=>console.log(err));
+    apiDeleteColor(color.id)
+      .then(res => {
+        console.log('delete color', res);
+        updateColors();
+      })
+      .catch(err => console.error(err.response));
   };
 
   return (
@@ -47,7 +41,7 @@ const ColorList = ({ colors, updateColors }) => {
       <p>colors</p>
       <ul>
         {colors.map(color => (
-          <li key={color.color} onClick={() => editColor(color)}>
+          <li key={color.color} onClick={() => editColor(color)} data-testid='color'>
             <span>
               <span className="delete" onClick={e => {
                     e.stopPropagation();

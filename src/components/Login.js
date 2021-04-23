@@ -1,70 +1,61 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React from "react";
+import { useHistory } from 'react-router-dom';
+import useForm from '../helpers/useForm';
+import { login } from '../helpers/api';
 
+const Login = () => {
 
-const initState = {
-  username: 'Lambda School',
-  password: 'i<3Lambd4',
-}
+  const [ form, handleChange ] = useForm({
+    username: 'Lambda School',
+    password: 'i<3Lambd4',
+  });
 
-const Login = (props) => {
+  const history = useHistory();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    login(form)
+      .then(res => {
+        const token = res?.data?.payload;
+        if (token) localStorage.setItem('token', token);
+        history.push('/bubble');
+      })
+      .catch(err => {
+        console.error(err.response);
+      });
+  }
+
   // make a post request to retrieve a token from the api
   // when you have handled the token, navigate to the BubblePage route
-  const [form, setForm] = useState(initState);
-  const {push} = props.history
-
-  const submitHandler = (e) => {
-    e.preventDefault();
-
-    axios.post('http://localhost:5000/api/login', form)
-    .then((res)=>{
-      localStorage.setItem('token', res.data.payload)
-      push('/bubble-page')
-    })
-    .catch((err)=>{
-      console.log(err);
-    })
-  }
-
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.id]: e.target.value
-    })
-  }
-
-  
-    // make a post request to retrieve a token from the api
-    // when you have handled the token, navigate to the BubblePage route
+  // make a post request to retrieve a token from the api
+  // when you have handled the token, navigate to the BubblePage route
   
   return (
-    <>
+    <div>
+      
       <h1>
         Welcome to the Bubble App!
         <p>Build a login page here</p>
       </h1>
-      <form onSubmit={submitHandler}>
-        <label htmlFor='username'>
-          <input
-          type='text'
-          id='username'
-          placeholder='username'
-          onChange={handleChange}
-          value={form.username}
-          />
-        </label>
-        <label htmlFor='password'>
-          <input
-          type='text'
-          id='password'
-          placeholder='password'
-          onChange={handleChange}
-          value={form.password}
-          />
-        </label>
-        <button>Login</button>
+      
+      <form onSubmit={handleSubmit}>
+        
+        <div>
+          <label htmlFor='username'>Username</label><br/>
+          <input name='username' id='username' type='text' onChange={handleChange} value={form.username} />
+        </div>
+
+        <div>
+          <label htmlFor='password'>Password</label><br/>
+          <input name='password' id='password' type='password' onChange={handleChange} value={form.password} />
+        </div>
+
+        <button>Log In</button>
+
       </form>
-    </>
+      
+    </div> 
+    
   );
 };
 
