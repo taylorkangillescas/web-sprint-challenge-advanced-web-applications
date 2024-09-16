@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
+import EditMenu from './EditMenu';
+import axios from 'axios';
+import { updateColor, deleteColor as apiDeleteColor } from '../helpers/api';
 
 const initialColor = {
   color: "",
@@ -17,10 +19,21 @@ const ColorList = ({ colors, updateColors }) => {
 
   const saveEdit = e => {
     e.preventDefault();
-
+    updateColor(colorToEdit.id, colorToEdit)
+      .then(res => {
+        console.log('edit', res);
+        updateColors();
+      })
+      .catch(err => console.error(err.response));
   };
 
   const deleteColor = color => {
+    apiDeleteColor(color.id)
+      .then(res => {
+        console.log('delete color', res);
+        updateColors();
+      })
+      .catch(err => console.error(err.response));
   };
 
   return (
@@ -28,7 +41,7 @@ const ColorList = ({ colors, updateColors }) => {
       <p>colors</p>
       <ul>
         {colors.map(color => (
-          <li key={color.color} onClick={() => editColor(color)}>
+          <li key={color.color} onClick={() => editColor(color)} data-testid='color'>
             <span>
               <span className="delete" onClick={e => {
                     e.stopPropagation();
